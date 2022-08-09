@@ -11,7 +11,7 @@
 #define LEDPin D5
 #define TCHPin D6
 #define MAX_BRIGHTNESS 200
-#define LEDNumber 24
+#define LEDNumber 23
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
@@ -215,7 +215,7 @@ void thunderShower() {
   int pos4 = random8(LEDNumber);
   int pos5 = random8(LEDNumber);
   pos = pos < 1 ? 2 : pos;
-  pos = pos >= 23 ? 22 : pos;
+  pos = pos >= 22 ? 21 : pos;
 
   if ( random8() < 230) {
     displayInfo[pos] = CHSV(150, 200, 100);
@@ -279,7 +279,7 @@ void rain(int level) {
   fade.attach_ms(20, [fadeSpeed] {fadeToBlackBy( displayInfo, LEDNumber, fadeSpeed); FastLED.show();});
   int pos = random8(LEDNumber);
   pos = pos < 1 ? 2 : pos;
-  pos = pos >= 23 ? 22 : pos;
+  pos = pos >= 22 ? 21 : pos;
 
   if ( random8() < twinkleChance) {
     displayInfo[pos] = CHSV(150, 200, 100);
@@ -313,7 +313,7 @@ void snow(int level) {
   fade.attach_ms(20, [fadeSpeed] {fadeToBlackBy( displayInfo, LEDNumber, fadeSpeed); FastLED.show();});
   int pos = random8(LEDNumber);
   pos = pos < 1 ? 2 : pos;
-  pos = pos >= 23 ? 22 : pos;
+  pos = pos >= 22 ? 21 : pos;
 
   if ( random8() < 255) {
     displayInfo[pos] = CHSV(150, 80, 150);
@@ -358,6 +358,8 @@ void warnningWater() {
 
 void sunny() {
   int pos = random8(LEDNumber);
+  pos = pos < 1 ? 2 : pos;
+  pos = pos >= 22 ? 21 : pos;
   fill_solid(displayInfo, LEDNumber, CHSV(20, 220, 60));
   FastLED.show();
   for (int i = 0; i < 100; i++) {
@@ -383,6 +385,8 @@ void sunny() {
 
 void cloudy() {
   int pos = random8(LEDNumber);
+  pos = pos < 1 ? 2 : pos;
+  pos = pos >= 22 ? 21 : pos;
   fill_solid(displayInfo, LEDNumber, CHSV(230, 120, 60));
   FastLED.show();
   for (int i = 0; i < 100; i++) {
