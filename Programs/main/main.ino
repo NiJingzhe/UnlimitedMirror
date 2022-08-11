@@ -10,7 +10,7 @@
 #include <WString.h>
 #define LEDPin D5
 #define TCHPin D6
-#define MAX_BRIGHTNESS 200
+#define MAX_BRIGHTNESS 255
 #define LEDNumber 23
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
@@ -140,7 +140,7 @@ void loop() {
 
   if (displayReady && !touched) {
     requestInterval = 120;
-    FastLED.setBrightness(200);
+    FastLED.setBrightness(255);
     LEDDisplay(weatherInfo.nowWeather);
     displayReady = false;
   }
@@ -153,29 +153,23 @@ void startupConfig() {
   String ssid = readString(1);
   String passwd = readString(256);
   String cityName = readString(512);
-  Serial.println(ssid);
-  Serial.println(passwd);
-  Serial.println(cityName);
+  //Serial.println(ssid);
+  //Serial.println(passwd);
+  //Serial.println(cityName);
   if (ssid != "" && passwd != "" && cityName != "") {
     configInfo.ssid = ssid;
     configInfo.passwd = passwd;
     configInfo.cityName = cityName;
-    Serial.println(configInfo.ssid);
-    Serial.println(configInfo.passwd);
-    Serial.println(configInfo.cityName);
+    //Serial.println(configInfo.ssid);
+    //Serial.println(configInfo.passwd);
+    //Serial.println(configInfo.cityName);
     WiFi.begin(configInfo.ssid, configInfo.passwd);
-    Serial.print("Connecting");
+    //Serial.print("Connecting");
     while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      Serial.print(".");
+      //Serial.print(".");
       delay(1000);
       WiFi.begin(configInfo.ssid, configInfo.passwd);
     }
-    if (WiFi.waitForConnectResult() == WL_CONNECTED) {
-      Serial.println("");
-      Serial.print("Connected!  ");
-      Serial.println(WiFi.localIP());
-    }
-
   }
   else {
     configInfo.ssid = "";
@@ -362,23 +356,23 @@ void sunny() {
   pos = pos >= 22 ? 21 : pos;
   fill_solid(displayInfo, LEDNumber, CHSV(20, 220, 60));
   FastLED.show();
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 150; i++) {
     displayInfo[pos] = CHSV(20, 220, 60 + i);
     displayInfo[pos + 1] = CHSV(20, 220, 60 + i * 0.6);
     displayInfo[pos - 1] = CHSV(20, 220, 60 + i * 0.6);
     displayInfo[pos - 2] = CHSV(20, 220, 60 + i * 0.4);
     displayInfo[pos + 2] = CHSV(20, 220, 60 + i * 0.4);
     FastLED.show();
-    delay(20);
+    delay(5);
   }
-  for (int i = 0; i < 100; i++) {
-    displayInfo[pos] = CHSV(20, 220, 160 - i);
-    displayInfo[pos + 1] = CHSV(20, 220, 120 - i * 0.6);
-    displayInfo[pos - 1] = CHSV(20, 220, 120 - i * 0.6);
-    displayInfo[pos - 2] = CHSV(20, 220, 100 - i * 0.4);
-    displayInfo[pos + 2] = CHSV(20, 220, 100 - i * 0.4);
+  for (int i = 0; i < 150; i++) {
+    displayInfo[pos] = CHSV(20, 220, 210 - i);
+    displayInfo[pos + 1] = CHSV(20, 220, 150 - i * 0.6);
+    displayInfo[pos - 1] = CHSV(20, 220, 150 - i * 0.6);
+    displayInfo[pos - 2] = CHSV(20, 220, 120 - i * 0.4);
+    displayInfo[pos + 2] = CHSV(20, 220, 120 - i * 0.4);
     FastLED.show();
-    delay(20);
+    delay(5);
   }
 }
 
@@ -389,23 +383,23 @@ void cloudy() {
   pos = pos >= 22 ? 21 : pos;
   fill_solid(displayInfo, LEDNumber, CHSV(230, 120, 60));
   FastLED.show();
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 150; i++) {
     displayInfo[pos] = CHSV(230, 120, 60 + i);
     displayInfo[pos + 1] = CHSV(230, 120, 60 + i * 0.6);
     displayInfo[pos - 1] = CHSV(230, 120, 60 + i * 0.6);
     displayInfo[pos - 2] = CHSV(230, 120, 60 + i * 0.4);
     displayInfo[pos + 2] = CHSV(230, 120, 60 + i * 0.4);
     FastLED.show();
-    delay(20);
+    delay(5);
   }
-  for (int i = 0; i < 100; i++) {
-    displayInfo[pos] = CHSV(230, 120, 160 - i);
-    displayInfo[pos + 1] = CHSV(230, 120, 120 - i * 0.6);
-    displayInfo[pos - 1] = CHSV(230, 120, 120 - i * 0.6);
-    displayInfo[pos - 2] = CHSV(230, 120, 100 - i * 0.4);
-    displayInfo[pos + 2] = CHSV(230, 120, 100 - i * 0.4);
+  for (int i = 0; i < 150; i++) {
+    displayInfo[pos] = CHSV(230, 120, 210 - i);
+    displayInfo[pos + 1] = CHSV(230, 120, 150 - i * 0.6);
+    displayInfo[pos - 1] = CHSV(230, 120, 150 - i * 0.6);
+    displayInfo[pos - 2] = CHSV(230, 120, 120 - i * 0.4);
+    displayInfo[pos + 2] = CHSV(230, 120, 120 - i * 0.4);
     FastLED.show();
-    delay(20);
+    delay(5);
   }
 }
 
@@ -416,7 +410,7 @@ void writeString(int addr, String data) {
   for (int i = 0; i < data.length(); i++) {
     EEPROM.write(addr + 1 + i, (int)data[i]);
   }
-  EEPROM.commit();
+  EEPROM.end();
   return;
 }
 
@@ -587,14 +581,9 @@ void resultDisplay() {
       //start wifi
       WiFi.begin(configInfo.ssid, configInfo.passwd);
       while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-        Serial.print(".");
-        delay(1000);
+        //Serial.print(".");
+        delay(500);
         WiFi.begin(configInfo.ssid, configInfo.passwd);
-      }
-      if (WiFi.waitForConnectResult() == WL_CONNECTED) {
-        Serial.println("");
-        Serial.print("Connected!  ");
-        Serial.println(WiFi.localIP());
       }
     }
   }
