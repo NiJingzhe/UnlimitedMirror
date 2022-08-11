@@ -59,12 +59,12 @@ void setPage();
 void resultDisplay();
 
 void setup() {
-  Serial.begin(115200);
   pinMode(TCHPin, INPUT);
+  Serial.begin(115200);
+  WiFi.softAP("Mirror");
   EEPROM.begin(4096);
   startupConfig();
   LEDStripInit();
-  WiFi.softAP("Mirror");
   server.on("/", setPage);
   server.on("/set_finished/", resultDisplay);
   server.begin();
