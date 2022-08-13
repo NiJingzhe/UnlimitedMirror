@@ -62,12 +62,12 @@ void setup() {
   pinMode(TCHPin, INPUT);
   Serial.begin(115200);
   WiFi.softAP("Mirror");
-  EEPROM.begin(4096);
-  startupConfig();
-  LEDStripInit();
   server.on("/", setPage);
   server.on("/set_finished/", resultDisplay);
   server.begin();
+  EEPROM.begin(4096);
+  LEDStripInit();
+  startupConfig();
   displayCtrl.attach_ms(20, []() {
     displayReady = firstRequestDone ? true : false;
   });
@@ -113,8 +113,6 @@ void setup() {
     ArduinoOTA.setPassword("ilovenana");
     ArduinoOTA.begin();
   }
-  displayInfo[0] = CRGB::Black;
-  FastLED.show();
   FastLED.setBrightness(0);
   FastLED.show();
 }
@@ -122,7 +120,8 @@ void setup() {
 
 void loop() {
   server.handleClient();
-  ArduinoOTA.handle();
+  if (WiFi.waitForConnectResult() == WL_CONNECTED)
+    ArduinoOTA.handle();
   if (requestCounter > requestInterval) {
     requestCounter = 0;
     requestWeatherInfo();
@@ -153,6 +152,7 @@ void startupConfig() {
   String ssid = readString(1);
   String passwd = readString(256);
   String cityName = readString(512);
+  //  int tryCounter = 0;
   //Serial.println(ssid);
   //Serial.println(passwd);
   //Serial.println(cityName);
@@ -165,16 +165,87 @@ void startupConfig() {
     //Serial.println(configInfo.cityName);
     WiFi.begin(configInfo.ssid, configInfo.passwd);
     //Serial.print("Connecting");
-    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-      //Serial.print(".");
-      delay(1000);
-      WiFi.begin(configInfo.ssid, configInfo.passwd);
+    //    while ((WiFi.waitForConnectResult() != WL_CONNECTED) && (tryCounter <= 3)) {
+    //      //Serial.print(".");
+    //      delay(800);
+    //      WiFi.begin(configInfo.ssid, configInfo.passwd);
+    //      tryCounter++;
+    //    }
+    if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+      FastLED.setBrightness(200);
+      fill_solid(displayInfo, LEDNumber, CRGB::Green);
+      FastLED.show();
+      delay(100);
+      fill_solid(displayInfo, LEDNumber, CRGB::Black);
+      FastLED.show();
+      delay(100);
+      fill_solid(displayInfo, LEDNumber, CRGB::Green);
+      FastLED.show();
+      delay(100);
+      fill_solid(displayInfo, LEDNumber, CRGB::Black);
+      FastLED.show();
+      delay(100);
+      fill_solid(displayInfo, LEDNumber, CRGB::Red);
+      FastLED.show();
+      for (int i = 200; i >= 0; i--) {
+        FastLED.setBrightness(i);
+        delay(5);
+        FastLED.show();
+      }
+      fill_solid(displayInfo, LEDNumber, CRGB::Black);
+      FastLED.show();
+    }
+    else{
+      FastLED.setBrightness(200);
+      fill_solid(displayInfo, LEDNumber, CRGB::Green);
+      FastLED.show();
+      delay(200);
+      fill_solid(displayInfo, LEDNumber, CRGB::Black);
+      FastLED.show();
+      delay(200);
+      fill_solid(displayInfo, LEDNumber, CRGB::Green);
+      FastLED.show();
+      delay(200);
+      FastLED.setBrightness(0);
+      fill_solid(displayInfo, LEDNumber, CRGB::Green);
+      FastLED.show();
+      delay(200);
+      for (int i = 0; i <= 200 ; i++) {
+        FastLED.setBrightness(i);
+        delay(5);
+        FastLED.show();
+      }
+      delay(500);
+      fill_solid(displayInfo, LEDNumber, CRGB::Green);
+      FastLED.show();
     }
   }
   else {
     configInfo.ssid = "";
     configInfo.passwd = "";
     configInfo.cityName = "huzhou";
+    FastLED.setBrightness(255);
+    fill_solid(displayInfo, LEDNumber, CRGB::Green);
+    FastLED.show();
+    delay(200);
+    fill_solid(displayInfo, LEDNumber, CRGB::Black);
+    FastLED.show();
+    delay(200);
+    fill_solid(displayInfo, LEDNumber, CRGB::Green);
+    FastLED.show();
+    delay(200);
+    fill_solid(displayInfo, LEDNumber, CRGB::Black);
+    FastLED.show();
+    delay(200);
+    fill_solid(displayInfo, LEDNumber, CRGB::Red);
+    FastLED.show();
+    for (int i = 255; i >= 0; i--) {
+      FastLED.setBrightness(i);
+      delay(5);
+      FastLED.show();
+    }
+    fill_solid(displayInfo, LEDNumber, CRGB::Black);
+    FastLED.show();
   }
 }
 
@@ -195,6 +266,16 @@ String readString(int addr) {
   else {
     return "";
   }
+}
+
+
+void writeString(int addr, String data) {
+  EEPROM.write(addr, data.length());
+  for (int i = 0; i < data.length(); i++) {
+    EEPROM.write(addr + 1 + i, (int)data[i]);
+  }
+  EEPROM.commit();
+  return;
 }
 
 //灯效
@@ -405,14 +486,6 @@ void cloudy() {
 
 
 
-void writeString(int addr, String data) {
-  EEPROM.write(addr, data.length());
-  for (int i = 0; i < data.length(); i++) {
-    EEPROM.write(addr + 1 + i, (int)data[i]);
-  }
-  EEPROM.end();
-  return;
-}
 
 
 //LED strip initialize
@@ -523,19 +596,21 @@ void setPage() {
   String webpage = "";
   webpage =  "<html>\
           <head>\
+            <meta charset=\"UTF-8\">\
+            <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\
             <title>SetPage</title>\
             <style>\
               body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
             </style>\
           </head>\
           <body>\
-            <h1>Plaese input the name and password of your WiFi</h1><br>\
+            <h1>配置WiFi和地区</h1><br>\
             <form method=\"post\" action=\"/set_finished/\">\
-              <p>name</p>\
+              <p>WiFi名称</p>\
               <input type=\"text\" name=\"ssid\"}\'><br>\
-              <p>password</p>\
+              <p>密码</p>\
               <input type=\"text\" name=\"passwd\"}\'><br>\
-              <p>Your city name</p>\
+              <p>城市名称(使用英文，不用首字母大写，如 huzhou)</p>\
               <input type=\"text\" name=\"cityName\"}\'><br>\
               <input type=\"submit\" value=\"Submit\">\
           </body>\
@@ -552,18 +627,20 @@ void resultDisplay() {
     //get the arguments,0 is ssid and 1 is password
     configInfo.ssid = server.arg(0);
     configInfo.passwd = server.arg(1);
-    configInfo.cityName = server.arg(2);
+    configInfo.cityName = server.arg(2) == "" ? "huzhou" : server.arg(2);
 
     String webpage = "";
     webpage = "<html>\
             <head>\
+              <meta charset=\"UTF-8\">\
+              <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\
               <title>SetFinished</title>\
               <style>\
                 body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
               </style>\
             </head>\
             <body>\
-              <h4>the name of your WiFi: " + configInfo.ssid + " and the password is: " + configInfo.passwd + " and your city name is: " + configInfo.cityName + "</h4>" + '\n' +
+              <h4>WiFi名称: " + configInfo.ssid + "\n   密码: " + configInfo.passwd + "\n   城市: " + configInfo.cityName + "</h4>" + '\n' +
               "<form method=\"POST\" action=\"/\">\
                 <input type=\"submit\" value=\"Back\">\
             </body>\
@@ -580,10 +657,72 @@ void resultDisplay() {
       writeString(512, configInfo.cityName);
       //start wifi
       WiFi.begin(configInfo.ssid, configInfo.passwd);
-      while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-        //Serial.print(".");
-        delay(500);
-        WiFi.begin(configInfo.ssid, configInfo.passwd);
+      //      int tryCounter = 0;
+      //      while ((WiFi.waitForConnectResult() != WL_CONNECTED) && (tryCounter <= 5)) {
+      //        //Serial.print(".");
+      //        delay(800);
+      //        WiFi.begin(configInfo.ssid, configInfo.passwd);
+      //        tryCounter++;
+      //      }
+      if (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        ESP.restart();
+      }
+      else{
+        FastLED.setBrightness(200);
+        fill_solid(displayInfo, LEDNumber, CRGB::Green);
+        FastLED.show();
+        delay(200);
+        fill_solid(displayInfo, LEDNumber, CRGB::Black);
+        FastLED.show();
+        delay(200);
+        fill_solid(displayInfo, LEDNumber, CRGB::Green);
+        FastLED.show();
+        delay(200);
+        FastLED.setBrightness(0);
+        fill_solid(displayInfo, LEDNumber, CRGB::Green);
+        FastLED.show();
+        delay(200);
+        for (int i = 0; i <= 200 ; i++) {
+          FastLED.setBrightness(i);
+          delay(5);
+          FastLED.show();
+        }
+        fill_solid(displayInfo, LEDNumber, CRGB::Green);
+        FastLED.show();
+        requestCounter = 300;
+        ArduinoOTA.onStart([]() {
+            String type;
+            if (ArduinoOTA.getCommand() == U_FLASH) {
+              type = "sketch";
+            } else { // U_FS
+              type = "filesystem";
+            }
+            // NOTE: if updating FS this would be the place to unmount FS using FS.end()
+            Serial.println("Start updating " + type);
+          });
+          ArduinoOTA.onEnd([]() {
+            Serial.println("\nEnd");
+          });
+          ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+            Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+          });
+          ArduinoOTA.onError([](ota_error_t error) {
+            Serial.printf("Error[%u]: ", error);
+            if (error == OTA_AUTH_ERROR) {
+              Serial.println("Auth Failed");
+            } else if (error == OTA_BEGIN_ERROR) {
+              Serial.println("Begin Failed");
+            } else if (error == OTA_CONNECT_ERROR) {
+              Serial.println("Connect Failed");
+            } else if (error == OTA_RECEIVE_ERROR) {
+              Serial.println("Receive Failed");
+            } else if (error == OTA_END_ERROR) {
+              Serial.println("End Failed");
+            }
+          });
+          ArduinoOTA.setHostname("ESP8266");
+          ArduinoOTA.setPassword("ilovenana");
+          ArduinoOTA.begin();
       }
     }
   }

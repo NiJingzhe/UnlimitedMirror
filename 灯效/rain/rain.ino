@@ -11,7 +11,7 @@
 
 #define twinkleChance 255        //  闪烁数量，数值越大闪烁越多（0-255） 
  
-uint8_t max_bright = 200;       // LED亮度控制变量，可使用数值为 0 ～ 255， 数值越大则光带亮度越高
+uint8_t max_bright = 255;       // LED亮度控制变量，可使用数值为 0 ～ 255， 数值越大则光带亮度越高
  
 CRGB leds[NUM_LEDS];            // 建立光带leds
  
@@ -78,7 +78,7 @@ void setup() {
  
 void loop() {      
   ArduinoOTA.handle();
-  rain(3);
+  rain(2);
 //  fill_solid(leds, 24, CRGB(0,0,0)); 
 //  FastLED.show(); 
 }

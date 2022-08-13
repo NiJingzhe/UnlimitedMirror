@@ -11,7 +11,7 @@
 
 #define twinkleChance 255        //  闪烁数量，数值越大闪烁越多（0-255） 
  
-uint8_t max_bright = 200;       // LED亮度控制变量，可使用数值为 0 ～ 255， 数值越大则光带亮度越高
+uint8_t max_bright = 255;       // LED亮度控制变量，可使用数值为 0 ～ 255， 数值越大则光带亮度越高
  
 CRGB displayInfo[NUM_LEDS];            // 建立光带leds
  
@@ -88,22 +88,22 @@ void sunny(){
   int pos = random8(NUM_LEDS);
   fill_solid(displayInfo, NUM_LEDS, CHSV(20, 220, 60));
   FastLED.show();
-  for (int i = 0; i < 100; i++){
+  for (int i = 0; i < 150; i++){
     displayInfo[pos] = CHSV(20,220,60+i);
     displayInfo[pos+1] = CHSV(20,220,60+i*0.6);
     displayInfo[pos-1] = CHSV(20,220,60+i*0.6);
     displayInfo[pos-2] = CHSV(20,220,60+i*0.4);
     displayInfo[pos+2] = CHSV(20,220,60+i*0.4);
     FastLED.show();
-    delay(20); 
+    delay(5); 
   }
-  for (int i = 0; i < 100; i++){
-    displayInfo[pos] = CHSV(20,220,160-i);
-    displayInfo[pos+1] = CHSV(20,220,120-i*0.6);
-    displayInfo[pos-1] = CHSV(20,220,120-i*0.6);
-    displayInfo[pos-2] = CHSV(20,220,100-i*0.4);
-    displayInfo[pos+2] = CHSV(20,220,100-i*0.4);
+  for (int i = 0; i < 150; i++){
+    displayInfo[pos] = CHSV(20,220,210-i);
+    displayInfo[pos+1] = CHSV(20,220,150-i*0.6);
+    displayInfo[pos-1] = CHSV(20,220,150-i*0.6);
+    displayInfo[pos-2] = CHSV(20,220,120-i*0.4);
+    displayInfo[pos+2] = CHSV(20,220,120-i*0.4);
     FastLED.show();
-    delay(20); 
+    delay(5); 
   }
 }

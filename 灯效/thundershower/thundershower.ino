@@ -11,7 +11,7 @@
 
 #define twinkleChance 100        //  闪烁数量，数值越大闪烁越多（0-255） 
  
-uint8_t max_bright = 200;       // LED亮度控制变量，可使用数值为 0 ～ 255， 数值越大则光带亮度越高
+uint8_t max_bright = 255;       // LED亮度控制变量，可使用数值为 0 ～ 255， 数值越大则光带亮度越高
  
 CRGB displayInfo[NUM_LEDS];            // 建立光带leds
  
